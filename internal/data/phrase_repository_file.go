@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"encoding/csv"
-	"fmt"
 	"lecture/domain"
 	"math/rand"
 	"os"
@@ -27,7 +26,6 @@ func (repo *filePhraseRepository) GetPhraseOfTheDay(ctx context.Context) *domain
 	var lineNumber int32
 	fileScanner.Scan()
 	line := fileScanner.Text()
-	fmt.Println(randomLineNumber)
 	for lineNumber = 1; lineNumber < randomLineNumber && fileScanner.Scan(); lineNumber++ {
 		line = fileScanner.Text()
 	}
