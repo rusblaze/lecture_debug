@@ -2,7 +2,7 @@ package interceptor
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
+	"lecture/pkg/log"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
@@ -15,10 +15,10 @@ func LogHandler(fn http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
 			return
 		}
-		log.Trace().Msgf("Request is %q", x)
+		log.Trace(r.Context()).Msgf("Request is %q", x)
 		rec := httptest.NewRecorder()
 		fn(rec, r)
-		log.Trace().Msgf("Response is %q", rec.Body)
+		log.Trace(r.Context()).Msgf("Response is %q", rec.Body)
 
 		// this copies the recorded response to the response writer
 		for k, v := range rec.Result().Header {

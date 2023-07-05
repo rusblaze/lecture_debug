@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"context"
 	"encoding/csv"
-	"github.com/rs/zerolog/log"
 	"lecture/domain"
+	"lecture/pkg/log"
 	"math/rand"
 	"os"
 	"strings"
@@ -28,11 +28,11 @@ func (repo *filePhraseRepository) GetPhraseOfTheDay(ctx context.Context) *domain
 	var lineNumber int32
 	fileScanner.Scan()
 	line := fileScanner.Text()
-	log.Debug().Caller().Msgf("randomLineNumber = %d", randomLineNumber)
+	log.Debug(ctx).Caller().Msgf("randomLineNumber = %d", randomLineNumber)
 	for lineNumber = 1; lineNumber < randomLineNumber && fileScanner.Scan(); lineNumber++ {
 		line = fileScanner.Text()
 	}
-	log.Debug().Caller().Msgf("line = %s, lineNumber = %d", line, lineNumber)
+	log.Debug(ctx).Caller().Msgf("line = %s, lineNumber = %d", line, lineNumber)
 	r := csv.NewReader(strings.NewReader(line))
 	r.Comma = '\t'
 	record, _ := r.Read()

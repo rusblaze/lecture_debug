@@ -1,19 +1,19 @@
 package interceptor
 
 import (
-	"github.com/rs/zerolog/log"
+	"lecture/pkg/log"
 	"net/http"
 )
 
 func RecoverHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
-			if r := recover(); r != nil {
-				logEvent := log.Error().Caller()
-				if err, ok := r.(error); ok {
+			if rec := recover(); rec != nil {
+				logEvent := log.Error(r.Context()).Caller()
+				if err, ok := rec.(error); ok {
 					logEvent.Err(err)
 				}
-				logEvent.Msgf("Recover from panic %v", r)
+				logEvent.Msgf("Recover from panic %v", rec)
 				http.Error(w, "Произошла ошибка при обработке запроса. Попробуйте еще раз", http.StatusInternalServerError)
 			}
 		}()
