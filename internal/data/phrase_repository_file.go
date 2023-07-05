@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/csv"
+	"github.com/rs/zerolog/log"
 	"lecture/domain"
 	"math/rand"
 	"os"
@@ -19,7 +20,7 @@ func NewFilePhraseRepository(storage *os.File) domain.PhrasesRepository {
 }
 
 func (repo *filePhraseRepository) GetPhraseOfTheDay(ctx context.Context) *domain.Phrase {
-	repo.storage.Seek(0, 0)
+	repo.storage.Seek(0, 0) // <- Устанавливаем смещение в начало файла
 	fileScanner := bufio.NewScanner(repo.storage)
 	fileScanner.Split(bufio.ScanLines)
 
@@ -27,9 +28,11 @@ func (repo *filePhraseRepository) GetPhraseOfTheDay(ctx context.Context) *domain
 	var lineNumber int32
 	fileScanner.Scan()
 	line := fileScanner.Text()
+	log.Debug().Caller().Msgf("randomLineNumber = %d", randomLineNumber)
 	for lineNumber = 1; lineNumber < randomLineNumber && fileScanner.Scan(); lineNumber++ {
 		line = fileScanner.Text()
 	}
+	log.Debug().Caller().Msgf("line = %s, lineNumber = %d", line, lineNumber)
 	r := csv.NewReader(strings.NewReader(line))
 	r.Comma = '\t'
 	record, _ := r.Read()
