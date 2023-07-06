@@ -5,6 +5,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"lecture/internal/data"
 	"lecture/internal/http/handlers"
+	"lecture/internal/http/handlers/infra"
 	"lecture/internal/tracing"
 	"lecture/pkg/http/interceptor"
 	"net/http"
@@ -17,6 +18,8 @@ func main() {
 		panic(err)
 	}
 
+	log.Logger = log.With().Caller().Timestamp().Logger()
+
 	if err := tracing.SetupGlobalTracer("phrases", "0.0.2"); err != nil {
 		log.Error().Err(err).Msg("")
 	}
@@ -28,6 +31,7 @@ func main() {
 			interceptor.RecoverHandler(
 				interceptor.LogHandler(handler.PhraseOfTheDay))), "phrase-of-the-day")
 	http.Handle("/", phraseHandler)
+	http.HandleFunc("/infra/log_level", interceptor.RecoverHandler(interceptor.LogHandler(infra.SetLogLevel)))
 
 	log.Info().Msg("Starting HTTP server")
 	if err := http.ListenAndServe(":3333", nil); err != nil {
