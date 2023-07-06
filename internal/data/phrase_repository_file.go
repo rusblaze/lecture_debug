@@ -19,7 +19,7 @@ func NewFilePhraseRepository(storage *os.File) domain.PhrasesRepository {
 	return &filePhraseRepository{storage: storage}
 }
 
-func (repo *filePhraseRepository) GetPhraseOfTheDay(ctx context.Context) *domain.Phrase {
+func (repo *filePhraseRepository) GetPhraseOfTheDay(ctx context.Context) (*domain.Phrase, error) {
 	repo.storage.Seek(0, 0) // <- Устанавливаем смещение в начало файла
 	fileScanner := bufio.NewScanner(repo.storage)
 	fileScanner.Split(bufio.ScanLines)
@@ -28,13 +28,21 @@ func (repo *filePhraseRepository) GetPhraseOfTheDay(ctx context.Context) *domain
 	var lineNumber int32
 	fileScanner.Scan()
 	line := fileScanner.Text()
-	log.Debug(ctx).Caller().Msgf("randomLineNumber = %d", randomLineNumber)
+	log.Debug(ctx).Msgf("randomLineNumber = %d", randomLineNumber)
 	for lineNumber = 1; lineNumber < randomLineNumber && fileScanner.Scan(); lineNumber++ {
 		line = fileScanner.Text()
 	}
-	log.Debug(ctx).Caller().Msgf("line = %s, lineNumber = %d", line, lineNumber)
+	log.Debug(ctx).Msgf("line = %s, lineNumber = %d", line, lineNumber)
 	r := csv.NewReader(strings.NewReader(line))
 	r.Comma = '\t'
-	record, _ := r.Read()
-	return domain.NewPhrase(record[0], record[1])
+	record, err := r.Read()
+	if err != nil {
+		log.Error(ctx).Err(err).
+			Str("line", line).
+			Int32("randomLineNumber", randomLineNumber).
+			Int32("lineNumber", lineNumber).
+			Msg("error reading csv line")
+		return nil, err
+	}
+	return domain.NewPhrase(record[0], record[1]), nil
 }
