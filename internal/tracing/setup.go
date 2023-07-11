@@ -9,6 +9,7 @@ import (
 	"io"
 )
 
+// pkg/log/otel_log.go
 // newExporter returns a console exporter.
 func newExporter(w io.Writer) (trace.SpanExporter, error) {
 	return stdouttrace.New(

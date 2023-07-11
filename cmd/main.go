@@ -9,8 +9,11 @@ import (
 	"lecture/internal/tracing"
 	"lecture/pkg/http/interceptor"
 	"net/http"
+	_ "net/http/pprof" // Magic is here
 	"os"
 )
+
+// source cmd/main.go
 
 func main() {
 	file, err := os.Open("data/phrases.data")
